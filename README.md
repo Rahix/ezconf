@@ -1,6 +1,8 @@
 ezconf
 ======
 
+[Documentation](https://rahix.github.io/ezconf)
+
 A library to add configuration options to your project with as little
 boilerplate as possible. Uses `toml` as the configuration format.
 
