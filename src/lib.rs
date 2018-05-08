@@ -26,16 +26,6 @@ macro_rules! ezconf_file {
 }
 
 #[macro_export]
-macro_rules! ezconf {
-    ($confname:ident: $key:expr, $default:expr) => ({
-        use $crate::toml_query::read::TomlValueReadExt;
-        $confname.read($key)
-            .expect("Reading from config failed")
-            .unwrap_or($default)
-    })
-}
-
-#[macro_export]
 macro_rules! ezconf_str {
     ($confname:ident: $key:expr, $default:expr) => ({
         use $crate::toml_query::read::TomlValueReadExt;
@@ -92,8 +82,8 @@ mod test {
 
     #[test]
     fn test_ezconf() {
-        assert!(ezconf!(CONFIG: "package.name", &toml::Value::String("default".into()))
-          == &toml::Value::String("ezconf".into())
-        );
+        let name = ezconf_str!(CONFIG: "package.name", "Unnamed");
+
+        assert!(name == "ezconf");
     }
 }

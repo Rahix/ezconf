@@ -6,13 +6,6 @@ extern crate lazy_static;
 ezconf_file!(CONFIG = "tests/test.toml");
 
 #[test]
-fn test_ezconf_default() {
-    assert!(ezconf!(CONFIG: "package.unavailable", &ezconf::toml::Value::String("default".into()))
-      == &ezconf::toml::Value::String("default".into())
-    );
-}
-
-#[test]
 fn test_ezconf_str() {
     let name = ezconf_str!(CONFIG: "string.a", "Unnamed");
     let unavail = ezconf_str!(CONFIG: "string.unavail", "default");
