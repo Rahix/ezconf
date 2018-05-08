@@ -2,7 +2,7 @@
 //! ======
 //!
 //! A library to add configuration options to your project with as little
-//! boilerplate as possible.
+//! boilerplate as possible. Uses `toml` as the configuration format.
 //!
 //! All macros will cache the value for fast access times (Although, if it is
 //! really time critical, you should save it to a variable yourself)
