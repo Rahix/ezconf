@@ -26,6 +26,25 @@ macro_rules! ezconf_file {
 }
 
 #[macro_export]
+macro_rules! ezconf_toml {
+    ($confname:ident: $key:expr, $default:expr) => ({
+        lazy_static! {
+            static ref DEFAULT: $crate::toml::Value = {
+                $default
+            };
+            static ref CONTAINER: &'static $crate::toml::Value = {
+                use $crate::toml_query::read::TomlValueReadExt;
+                $confname.read($key)
+                    .expect("Reading from config failed")
+                    .unwrap_or(&DEFAULT)
+            };
+        }
+
+        *CONTAINER
+    })
+}
+
+#[macro_export]
 macro_rules! ezconf_str {
     ($confname:ident: $key:expr, $default:expr) => ({
         lazy_static! {
@@ -105,9 +124,9 @@ mod test {
     }
 
     #[test]
-    fn test_ezconf() {
-        let name = ezconf_str!(CONFIG: "package.name", "Unnamed");
-
-        assert!(name == "ezconf");
+    fn test_ezconf_toml() {
+        assert!(ezconf_toml!(CONFIG: "package.name", toml::Value::String("default".into()))
+          == &toml::Value::String("ezconf".into())
+        );
     }
 }
