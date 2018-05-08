@@ -28,44 +28,68 @@ macro_rules! ezconf_file {
 #[macro_export]
 macro_rules! ezconf_str {
     ($confname:ident: $key:expr, $default:expr) => ({
-        use $crate::toml_query::read::TomlValueReadExt;
-        $confname.read($key)
-            .expect("Reading from config failed")
-            .map(|v| v.as_str().expect(&format!("'{}' should be a string", $key)))
-            .unwrap_or($default)
+        lazy_static! {
+            static ref CONTAINER: &'static str = {
+                use $crate::toml_query::read::TomlValueReadExt;
+                $confname.read($key)
+                    .expect("Reading from config failed")
+                    .map(|v| v.as_str().expect(&format!("'{}' should be a string", $key)))
+                    .unwrap_or($default)
+            };
+        }
+
+        *CONTAINER
     })
 }
 
 #[macro_export]
 macro_rules! ezconf_int {
     ($confname:ident: $key:expr, $default:expr) => ({
-        use $crate::toml_query::read::TomlValueReadExt;
-        $confname.read($key)
-            .expect("Reading from config failed")
-            .map(|v| v.as_integer().expect(&format!("'{}' should be an integer", $key)))
-            .unwrap_or($default)
+        lazy_static! {
+            static ref CONTAINER: i64 = {
+                use $crate::toml_query::read::TomlValueReadExt;
+                $confname.read($key)
+                    .expect("Reading from config failed")
+                    .map(|v| v.as_integer().expect(&format!("'{}' should be an integer", $key)))
+                    .unwrap_or($default)
+            };
+        }
+
+        *CONTAINER
     })
 }
 
 #[macro_export]
 macro_rules! ezconf_float {
     ($confname:ident: $key:expr, $default:expr) => ({
-        use $crate::toml_query::read::TomlValueReadExt;
-        $confname.read($key)
-            .expect("Reading from config failed")
-            .map(|v| v.as_float().expect(&format!("'{}' should be a float", $key)))
-            .unwrap_or($default)
+        lazy_static! {
+            static ref CONTAINER: f64 = {
+                use $crate::toml_query::read::TomlValueReadExt;
+                $confname.read($key)
+                    .expect("Reading from config failed")
+                    .map(|v| v.as_float().expect(&format!("'{}' should be a float", $key)))
+                    .unwrap_or($default)
+            };
+        }
+
+        *CONTAINER
     })
 }
 
 #[macro_export]
 macro_rules! ezconf_bool {
     ($confname:ident: $key:expr, $default:expr) => ({
-        use $crate::toml_query::read::TomlValueReadExt;
-        $confname.read($key)
-            .expect("Reading from config failed")
-            .map(|v| v.as_bool().expect(&format!("'{}' should be a boolean", $key)))
-            .unwrap_or($default)
+        lazy_static! {
+            static ref CONTAINER: bool = {
+                use $crate::toml_query::read::TomlValueReadExt;
+                $confname.read($key)
+                    .expect("Reading from config failed")
+                    .map(|v| v.as_bool().expect(&format!("'{}' should be a boolean", $key)))
+                    .unwrap_or($default)
+            };
+        }
+
+        *CONTAINER
     })
 }
 
