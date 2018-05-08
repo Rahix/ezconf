@@ -1,0 +1,9 @@
+[package]
+authors = ["Rahix <rahix@rahix.de>"]
+name = "ezconf"
+version = "0.1.0"
+
+[dependencies]
+lazy_static = "1.0.0"
+toml = "0.4.6"
+toml-query = "0.6.0"
