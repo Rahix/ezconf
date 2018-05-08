@@ -1,7 +1,8 @@
 ezconf
 ======
 
-[Documentation](https://rahix.github.io/ezconf)
+[![Build Status](https://travis-ci.org/Rahix/ezconf.svg?branch=master)](https://travis-ci.org/Rahix/ezconf) 
+[![Docs](https://img.shields.io/badge/docs-0.1.0-blue.svg)](https://rahix.github.io/ezconf)
 
 A library to add configuration options to your project with as little
 boilerplate as possible. Uses `toml` as the configuration format.
