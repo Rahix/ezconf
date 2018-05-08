@@ -69,13 +69,13 @@ macro_rules! ezconf_file {
                 use ::std::io::Read;
                 let mut cfg_string = String::new();
                 ::std::fs::File::open($file)
-                    .expect("Can't read config file!")
+                    .expect("Can't read config file")
                     .read_to_string(&mut cfg_string)
-                    .expect("Can't read config file to string!");
+                    .expect("Can't read config file to string");
 
 
                 cfg_string.parse::<$crate::toml::Value>()
-                    .expect("Can't parse config file!")
+                    .expect("Can't parse config file")
             };
         }
     )
