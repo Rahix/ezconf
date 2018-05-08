@@ -11,8 +11,8 @@ fn main() {
     let c = ezconf_float!(CONFIG: "float.c", 0.0);
     let d = ezconf_bool!(CONFIG: "undefined.boolean", false);
 
-    println!("String: {}",  a);
+    println!("String: {}", a);
     println!("Integer: {}", b);
-    println!("Float: {}",   c);
+    println!("Float: {}", c);
     println!("Boolean: {}", d);
 }

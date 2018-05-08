@@ -1,3 +1,44 @@
+//! ezconf
+//! ======
+//!
+//! A library to add configuration options to your project with as little
+//! boilerplate as possible.
+//!
+//! All macros will cache the value for fast access times (Although, if it is
+//! really time critical, you should save it to a variable yourself)
+//!
+//! **Important**: Due to the way this crate was implemented, it is necessary
+//! to import the `lazy_static` macro in your project
+//!
+//! # Example
+//!
+//! ```
+//! #[macro_use]
+//! extern crate lazy_static;
+//! #[macro_use]
+//! extern crate ezconf;
+//!
+//! ezconf_file!(CONFIG = "tests/test.toml");
+//!
+//! fn main() {
+//!     let mut value = 100.0f64;
+//!     // This is supposed to be a very complex algorithm
+//!     for i in 0..1000 {
+//!         // The default value (0.1) will be used if the value
+//!         // does not exist in the config
+//!         let CONSTANT = ezconf_float!(CONFIG: "float.a", 0.1);
+//!
+//!         value = value.powf(CONSTANT);
+//!     }
+//! }
+//! ```
+#![deny(missing_docs,
+        missing_debug_implementations, missing_copy_implementations,
+        trivial_casts, trivial_numeric_casts,
+        unsafe_code,
+        unstable_features,
+        unused_import_braces, unused_qualifications)]
+
 #[cfg(test)]
 #[macro_use]
 extern crate lazy_static;
@@ -5,6 +46,21 @@ extern crate lazy_static;
 pub extern crate toml;
 pub extern crate toml_query;
 
+/// Open a config file and store it in a static variable for easy access later on
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate lazy_static;
+/// # #[macro_use]
+/// # extern crate ezconf;
+/// ezconf_file!(CONFIG = "tests/test.toml");
+///
+/// # fn main() {
+/// #   CONFIG.get("integer").unwrap();
+/// # }
+/// ```
 #[macro_export]
 macro_rules! ezconf_file {
     ($confname:ident = $file:expr) => (
@@ -25,6 +81,24 @@ macro_rules! ezconf_file {
     )
 }
 
+/// Read a `toml::Value` from the config
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate lazy_static;
+/// # #[macro_use]
+/// # extern crate ezconf;
+/// extern crate toml;
+///
+/// ezconf_file!(CONFIG = "tests/test.toml");
+///
+/// # fn main() {
+/// let val = ezconf_toml!(CONFIG: "integer", toml::Value::Boolean(false));
+/// assert!(val.is_table());
+/// # }
+/// ```
 #[macro_export]
 macro_rules! ezconf_toml {
     ($confname:ident: $key:expr, $default:expr) => ({
@@ -44,6 +118,22 @@ macro_rules! ezconf_toml {
     })
 }
 
+/// Read a string (`&str`) from the config
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate lazy_static;
+/// # #[macro_use]
+/// # extern crate ezconf;
+/// ezconf_file!(CONFIG = "tests/test.toml");
+///
+/// # fn main() {
+/// let val = ezconf_str!(CONFIG: "string.a", "Default");
+/// assert!(val == "Foo");
+/// # }
+/// ```
 #[macro_export]
 macro_rules! ezconf_str {
     ($confname:ident: $key:expr, $default:expr) => ({
@@ -61,6 +151,22 @@ macro_rules! ezconf_str {
     })
 }
 
+/// Read an integer (`i64`) from the config
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate lazy_static;
+/// # #[macro_use]
+/// # extern crate ezconf;
+/// ezconf_file!(CONFIG = "tests/test.toml");
+///
+/// # fn main() {
+/// let val = ezconf_int!(CONFIG: "integer.b", 123);
+/// assert!(val == 23434248);
+/// # }
+/// ```
 #[macro_export]
 macro_rules! ezconf_int {
     ($confname:ident: $key:expr, $default:expr) => ({
@@ -78,6 +184,22 @@ macro_rules! ezconf_int {
     })
 }
 
+/// Read a float (`f64`) from the config
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate lazy_static;
+/// # #[macro_use]
+/// # extern crate ezconf;
+/// ezconf_file!(CONFIG = "tests/test.toml");
+///
+/// # fn main() {
+/// let val = ezconf_float!(CONFIG: "float.a", 123.456);
+/// assert!((val - 2.0f64.sqrt()) < 0.0001);
+/// # }
+/// ```
 #[macro_export]
 macro_rules! ezconf_float {
     ($confname:ident: $key:expr, $default:expr) => ({
@@ -95,6 +217,24 @@ macro_rules! ezconf_float {
     })
 }
 
+/// Read a boolean from the config
+///
+/// # Example
+///
+/// ```
+/// # #[macro_use]
+/// # extern crate lazy_static;
+/// # #[macro_use]
+/// # extern crate ezconf;
+/// ezconf_file!(CONFIG = "tests/test.toml");
+///
+/// # fn main() {
+/// let val1 = ezconf_bool!(CONFIG: "boolean.available", false);
+/// let val2 = ezconf_bool!(CONFIG: "boolean.unavailable", false);
+/// assert!(val1);
+/// assert!(!val2);
+/// # }
+/// ```
 #[macro_export]
 macro_rules! ezconf_bool {
     ($confname:ident: $key:expr, $default:expr) => ({
@@ -125,8 +265,9 @@ mod test {
 
     #[test]
     fn test_ezconf_toml() {
-        assert!(ezconf_toml!(CONFIG: "package.name", toml::Value::String("default".into()))
-          == &toml::Value::String("ezconf".into())
+        assert!(
+            ezconf_toml!(CONFIG: "package.name", toml::Value::String("default".into())) ==
+                &toml::Value::String("ezconf".into())
         );
     }
 }
