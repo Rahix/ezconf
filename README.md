@@ -1,4 +1,4 @@
-ezconf [![Build Status](https://travis-ci.org/Rahix/ezconf.svg?branch=master)](https://travis-ci.org/Rahix/ezconf) [![Docs](https://img.shields.io/badge/docs-0.1.0-blue.svg)](https://rahix.github.io/ezconf)
+ezconf [![crates.io page](http://meritbadge.herokuapp.com/ezconf)](https://crates.io/crates/ezconf) [![Build Status](https://travis-ci.org/Rahix/ezconf.svg?branch=master)](https://travis-ci.org/Rahix/ezconf) [![Docs](https://img.shields.io/badge/docs-0.1.0-blue.svg)](https://rahix.github.io/ezconf) 
 ======
 
 
