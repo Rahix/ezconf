@@ -27,3 +27,13 @@ fn test_ezconf_float() {
     let val = ezconf_float!(CONFIG: "float.a", 0.1);
     assert!((val - 2.0f64.sqrt()) < 0.1);
 }
+
+#[test]
+fn test_ezconf_nonexistent() {
+    ezconf_file!(MY_CFG = "foo/bar/non-existent.toml");
+
+    assert_eq!(
+        ezconf_int!(MY_CFG: "int.abc", 42),
+        42,
+    );
+}

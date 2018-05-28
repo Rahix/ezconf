@@ -48,6 +48,9 @@ pub extern crate toml_query;
 
 /// Open a config file and store it in a static variable for easy access later on
 ///
+/// If the file does not exist, it will be assumed empty without an error. If it
+/// contains invalid toml, ezconf will panic.
+///
 /// # Example
 ///
 /// ```
@@ -66,16 +69,20 @@ macro_rules! ezconf_file {
     ($confname:ident = $file:expr) => (
         lazy_static! {
             static ref $confname: $crate::toml::Value = {
-                use ::std::io::Read;
-                let mut cfg_string = String::new();
                 ::std::fs::File::open($file)
-                    .expect("Can't read config file")
-                    .read_to_string(&mut cfg_string)
-                    .expect("Can't read config file to string");
-
-
-                cfg_string.parse::<$crate::toml::Value>()
-                    .expect("Can't parse config file")
+                    .and_then(|mut f| {
+                        use ::std::io::Read;
+                        let mut cfg_string = String::new();
+                        f.read_to_string(&mut cfg_string)
+                            .expect("Can't read config file to string");
+                        Ok(cfg_string)
+                    }).ok().map(|s| {
+                        s.parse::<$crate::toml::Value>()
+                            .expect("Can't parse config file as toml")
+                    }).unwrap_or(
+                        $crate::toml::Value::Table(
+                            $crate::toml::value::Table::new()
+                    ))
             };
         }
     )
