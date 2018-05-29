@@ -37,3 +37,49 @@ fn test_ezconf_nonexistent() {
         42,
     );
 }
+
+
+#[test]
+fn test_multiple_basic() {
+    ezconf_file!(CONFIG2 = "tests/test2.toml", "tests/test.toml");
+    ezconf_file!(CONFIG3 = "tests/test.toml", "tests/test2.toml");
+
+    assert_eq!(
+        ezconf_int!(CONFIG: "integer.a", 0),
+        1,
+    );
+    assert_eq!(
+        ezconf_int!(CONFIG2: "integer.a", 0),
+        3,
+    );
+    assert_eq!(
+        ezconf_int!(CONFIG3: "integer.a", 0),
+        1,
+    );
+}
+
+#[test]
+fn test_multiple_missing() {
+    ezconf_file!(
+        CFG = "tests/missing.toml",
+        "tests/test2.toml",
+        "tests/test.toml"
+    );
+    assert_eq!(
+        ezconf_int!(CFG: "integer.a", 0),
+        3,
+    );
+}
+
+#[test]
+fn test_multiple_all_missing() {
+    ezconf_file!(
+        CFG = "tests/missing1.toml",
+        "tests/missing2.toml",
+        "tests/missing3.toml"
+    );
+    assert_eq!(
+        ezconf_int!(CFG: "integer.a", 0),
+        0,
+    );
+}

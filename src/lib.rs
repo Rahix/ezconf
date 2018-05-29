@@ -18,7 +18,9 @@
 //! #[macro_use]
 //! extern crate ezconf;
 //!
-//! ezconf_file!(CONFIG = "tests/test.toml");
+//! // You can specify multiple config files. Only the first one
+//! // that can be opened will be used.
+//! ezconf_file!(CONFIG = "tests/test.toml", "tests/test2.toml");
 //!
 //! fn main() {
 //!     let mut value = 100.0f64;
@@ -48,6 +50,9 @@ pub extern crate toml_query;
 
 /// Open a config file and store it in a static variable for easy access later on
 ///
+/// You can specify multiple files, of which the first one that can be opened will
+/// be used (the other files are ignored completely)
+///
 /// If the file does not exist, it will be assumed empty without an error. If it
 /// contains invalid toml, ezconf will panic.
 ///
@@ -58,7 +63,7 @@ pub extern crate toml_query;
 /// # extern crate lazy_static;
 /// # #[macro_use]
 /// # extern crate ezconf;
-/// ezconf_file!(CONFIG = "tests/test.toml");
+/// ezconf_file!(CONFIG = "tests/test.toml", "tests/test2.toml");
 ///
 /// # fn main() {
 /// #   CONFIG.get("integer").unwrap();
@@ -66,10 +71,13 @@ pub extern crate toml_query;
 /// ```
 #[macro_export]
 macro_rules! ezconf_file {
-    ($confname:ident = $file:expr) => (
+    ($confname:ident = $($file:expr,)+) => (
         lazy_static! {
             static ref $confname: $crate::toml::Value = {
-                ::std::fs::File::open($file)
+                Err(::std::io::Error::new(::std::io::ErrorKind::Other, "No file selected"))
+                    $(.or_else(|_| {
+                        ::std::fs::File::open($file)
+                    }))+
                     .and_then(|mut f| {
                         use ::std::io::Read;
                         let mut cfg_string = String::new();
@@ -85,7 +93,10 @@ macro_rules! ezconf_file {
                     ))
             };
         }
-    )
+    );
+    ($confname:ident = $($file:expr),+) => (
+        ezconf_file!($confname = $($file,)+);
+    );
 }
 
 /// Read a `toml::Value` from the config

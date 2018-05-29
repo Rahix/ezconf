@@ -20,7 +20,9 @@ extern crate lazy_static;
 #[macro_use]
 extern crate ezconf;
 
-ezconf_file!(CONFIG = "tests/test.toml");
+// You can specify multiple config files. Only the first one
+// that can be opened will be used.
+ezconf_file!(CONFIG = "tests/test.toml", "tests/test2.toml");
 
 fn main() {
     let mut value = 100.0f64;
