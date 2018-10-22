@@ -1,10 +1,34 @@
+//! Configuration Sources
 use toml;
 use std::fs;
 use std::fmt;
 
+/// Configuration Sources
+///
+/// To be used when initializing a config.
+///
+/// # Example
+/// ```
+/// static CONFIG: ezconf::Config = ezconf::INIT;
+///
+/// fn main() {
+///     CONFIG.init([
+///         // Try a config in the current directory
+///         ezconf::Source::File("config.toml"),
+///         // Then try some standard paths
+///         ezconf::Source::File("~/.config.toml"),
+///         ezconf::Source::File("~/.config/config.toml"),
+///         ezconf::Source::File("/etc/config.toml"),
+///         // Finally resort to a default config embedded in the program
+///         ezconf::Source::Memory(include_str!("default.toml")),
+///     ].iter()).unwrap();
+/// }
+/// ```
 #[derive(Clone)]
 pub enum Source<'a> {
+    /// A config file
     File(&'a str),
+    /// An in-memory config file
     Memory(&'a str),
 }
 

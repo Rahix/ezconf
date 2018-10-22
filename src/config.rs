@@ -1,13 +1,38 @@
+//! Configuration
 use once_cell;
 use toml;
 use std::iter;
 use source;
 
+/// A configuration
+///
+/// Can be used as global (but don't forget to initialize it somewhere!):
+/// ```
+/// static CONFIG: ezconf::Config = ezconf::INIT;
+/// ```
 #[derive(Debug)]
 pub struct Config(once_cell::sync::OnceCell<toml::Value>);
+
+/// Initial value for configs
 pub const INIT: Config = Config(once_cell::sync::OnceCell::INIT);
 
 impl Config {
+    /// Initialize this configuration.
+    ///
+    /// Can only be called once, further calls will return `Err(())`.
+    ///
+    /// `sources` should be an iterator of possible config sources that are tried in
+    /// order.  The first one to load successfully will be used.  If none of them
+    /// load, an empty default config will be used and `false` is returned.
+    ///
+    /// # Example
+    /// ```
+    /// static CONFIG: ezconf::Config = ezconf::INIT;
+    ///
+    /// fn main() {
+    ///     CONFIG.init([ezconf::Source::File("config.toml")].iter()).unwrap();
+    /// }
+    /// ```
     pub fn init<'a>(
         &self,
         sources: impl iter::Iterator<Item = &'a source::Source<'a>>,
@@ -30,6 +55,21 @@ impl Config {
             })
     }
 
+    /// Retrieve a value from this config.
+    ///
+    /// Returns the value or `None` if it doesn't exist.
+    ///
+    /// # Example
+    /// ```
+    /// static CONFIG: ezconf::Config = ezconf::INIT;
+    ///
+    /// fn main() {
+    ///     CONFIG.init([ezconf::Source::File("tests/test.toml")].iter()).unwrap();
+    ///
+    ///     let v = CONFIG.get::<f32>("float.a").unwrap();
+    ///     assert_eq!(v, 1.4142135);
+    /// }
+    /// ```
     pub fn get<'a, T: toml::macros::Deserialize<'a> + ::std::fmt::Debug>(
         &self,
         path: &str,
@@ -59,6 +99,21 @@ impl Config {
             })
     }
 
+    /// Retrieve a value from this config or return a default.
+    ///
+    /// Returns the value or `def` if it doesn't exist.
+    ///
+    /// # Example
+    /// ```
+    /// static CONFIG: ezconf::Config = ezconf::INIT;
+    ///
+    /// fn main() {
+    ///     CONFIG.init([ezconf::Source::File("tests/test.toml")].iter()).unwrap();
+    ///
+    ///     let v = CONFIG.get_or::<String>("string.foobar", "somestring".into());
+    ///     assert_eq!(v, "somestring");
+    /// }
+    /// ```
     pub fn get_or<'a, T: toml::macros::Deserialize<'a> + ::std::fmt::Debug>(
         &self,
         path: &str,
