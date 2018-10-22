@@ -1,85 +1,98 @@
-#[macro_use]
+extern crate env_logger;
 extern crate ezconf;
-#[macro_use]
-extern crate lazy_static;
-
-ezconf_file!(CONFIG = "tests/test.toml");
 
 #[test]
-fn test_ezconf_str() {
-    let name = ezconf_str!(CONFIG: "string.a", "Unnamed");
-    let unavail = ezconf_str!(CONFIG: "string.unavail", "default");
-    let version = ezconf_str!(CONFIG: "string.b", "Unversioned");
+fn test_simple() {
+    let _ = env_logger::try_init();
+    let config = ezconf::INIT;
 
-    assert!(name == "Foo");
-    assert!(unavail == "default");
-    assert!(version == "Bar")
+    config
+        .init([ezconf::Source::File("tests/test.toml")].iter())
+        .unwrap();
 }
 
 #[test]
-fn test_ezconf_int() {
-    let val = ezconf_int!(CONFIG: "integer.a", 0);
-    assert!(val == 1);
+fn test_nosource() {
+    let _ = env_logger::try_init();
+    let config = ezconf::INIT;
+
+    let res = config
+        .init(
+            [
+                ezconf::Source::File("tests/no-config.toml"),
+                ezconf::Source::File("tests/no-config2.toml"),
+                ezconf::Source::File("tests/no-config-again.toml"),
+            ].iter(),
+        )
+        .unwrap();
+
+    assert_eq!(res, false);
 }
 
 #[test]
-fn test_ezconf_float() {
-    let val = ezconf_float!(CONFIG: "float.a", 0.1);
-    assert!((val - 2.0f64.sqrt()) < 0.1);
+fn test_double_load_fail() {
+    let _ = env_logger::try_init();
+    let config = ezconf::INIT;
+
+    config
+        .init([ezconf::Source::File("tests/no-config.toml")].iter())
+        .unwrap();
+    config
+        .init([ezconf::Source::File("tests/test.toml")].iter())
+        .unwrap_err();
 }
 
 #[test]
-fn test_ezconf_nonexistent() {
-    ezconf_file!(MY_CFG = "foo/bar/non-existent.toml");
+fn test_get() {
+    let _ = env_logger::try_init();
+    let config = ezconf::INIT;
 
-    assert_eq!(
-        ezconf_int!(MY_CFG: "int.abc", 42),
-        42,
-    );
-}
+    config
+        .init([ezconf::Source::File("tests/test.toml")].iter())
+        .unwrap();
 
-
-#[test]
-fn test_multiple_basic() {
-    ezconf_file!(CONFIG2 = "tests/test2.toml", "tests/test.toml");
-    ezconf_file!(CONFIG3 = "tests/test.toml", "tests/test2.toml");
-
-    assert_eq!(
-        ezconf_int!(CONFIG: "integer.a", 0),
-        1,
-    );
-    assert_eq!(
-        ezconf_int!(CONFIG2: "integer.a", 0),
-        3,
-    );
-    assert_eq!(
-        ezconf_int!(CONFIG3: "integer.a", 0),
-        1,
-    );
+    assert_eq!(config.get::<String>("string.a").unwrap(), "Foo");
+    assert_eq!(config.get::<String>("string.non-existing"), None);
+    assert_eq!(config.get::<u8>("integer.a").unwrap(), 1);
+    assert_eq!(config.get::<i32>("integer.c").unwrap(), -324);
+    assert_eq!(config.get::<f32>("float.a").unwrap(), 1.4142135);
+    assert_eq!(config.get::<bool>("boolean.available").unwrap(), true);
 }
 
 #[test]
-fn test_multiple_missing() {
-    ezconf_file!(
-        CFG = "tests/missing.toml",
-        "tests/test2.toml",
-        "tests/test.toml"
-    );
-    assert_eq!(
-        ezconf_int!(CFG: "integer.a", 0),
-        3,
-    );
+fn test_get_or() {
+    let _ = env_logger::try_init();
+    let config = ezconf::INIT;
+
+    config
+        .init([ezconf::Source::File("tests/test.toml")].iter())
+        .unwrap();
+
+    assert_eq!(config.get_or::<String>("string.a", "Hello".into()), "Foo");
+    assert_eq!(config.get_or::<String>("string.z", "Hello".into()), "Hello");
 }
 
 #[test]
-fn test_multiple_all_missing() {
-    ezconf_file!(
-        CFG = "tests/missing1.toml",
-        "tests/missing2.toml",
-        "tests/missing3.toml"
-    );
-    assert_eq!(
-        ezconf_int!(CFG: "integer.a", 0),
-        0,
-    );
+fn test_memory_source() {
+    let _ = env_logger::try_init();
+    let config = ezconf::INIT;
+
+    config
+        .init(
+            [
+                ezconf::Source::File("tests/this-config-doesnt-exist.toml"),
+                ezconf::Source::Memory(
+                    r#"[foo]
+bar = "baz"
+
+[hello]
+world = 42"#,
+                ),
+            ].iter(),
+        )
+        .unwrap();
+
+    assert_eq!(config.get_or::<String>("foo.bar", "Hello".into()), "baz");
+    assert_eq!(config.get_or::<usize>("hello.world", 0), 42);
+    assert_eq!(config.get_or::<bool>("non.existing", false), false);
 }
