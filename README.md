@@ -1,39 +1,23 @@
-ezconf [![crates.io page](http://meritbadge.herokuapp.com/ezconf)](https://crates.io/crates/ezconf) [![Build Status](https://travis-ci.org/Rahix/ezconf.svg?branch=master)](https://travis-ci.org/Rahix/ezconf) [![Docs](https://img.shields.io/badge/docs-0.2.0-blue.svg)](https://rahix.github.io/ezconf) 
+ezconf [![crates.io page](http://meritbadge.herokuapp.com/ezconf)](https://crates.io/crates/ezconf) [![Build Status](https://travis-ci.org/Rahix/ezconf.svg?branch=master)](https://travis-ci.org/Rahix/ezconf) [![docs.rs](https://docs.rs/ezconf/badge.svg)](https://docs.rs/ezconf)
 ======
-
-
 
 A library to add configuration options to your project with as little
 boilerplate as possible. Uses `toml` as the configuration format.
 
-All macros will cache the value for fast access times (Although, if it is
-really time critical, you should save it to a variable yourself)
-
-**Important**: Due to the way this crate was implemented, it is necessary
-to import the `lazy_static` macro in your project
-
 ## Example ##
 
 ```rust
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
 extern crate ezconf;
 
-// You can specify multiple config files. Only the first one
-// that can be opened will be used.
-ezconf_file!(CONFIG = "tests/test.toml", "tests/test2.toml");
+static CONFIG: ezconf::Config = ezconf::INIT;
 
 fn main() {
-    let mut value = 100.0f64;
-    // This is supposed to be a very complex algorithm
-    for i in 0..1000 {
-        // The default value (0.1) will be used if the value
-        // does not exist in the config
-        let CONSTANT = ezconf_float!(CONFIG: "float.a", 0.1);
+    CONFIG
+        .init([ezconf::Source::File("tests/test.toml")].iter())
+        .unwrap();
 
-        value = value.powf(CONSTANT);
-    }
+    let v = CONFIG.get_or::<String>("string.a", "Hello String".into());
+    println!("Value: {:?}", v);
 }
 ```
 
