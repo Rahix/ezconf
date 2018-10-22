@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["INIT","Initial value for configs"]],"struct":[["Config","A configuration"]]});
